@@ -1,3 +1,4 @@
+AddCSLuaFile()
 local store = {} -- Where we store cached math calculations 
 
 --For vgui caching, only exists clientside
