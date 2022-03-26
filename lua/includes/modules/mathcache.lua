@@ -1,25 +1,27 @@
 AddCSLuaFile()
+MathCache = MathCache or {} -- Create our global table for the library
+
 local store = {} -- Where we store cached math calculations 
 
---For vgui caching, only exists clientside
+-- For vgui caching, only exists clientside
 if CLIENT then
 	local ui_cache = {}
 
 	--[[
 		vgui_cache function:
-		
+
 		Description: To support screen resolution changes we need a seperate function made for caching stuff relating to vgui size, pos, ect.
 		This way we can void them all without having to also void all the other cached data for non-vgui stuff.
-		
+
 		Parameters:
 			id - The ID of the vgui data to cache
 			cback - The function callback used to perform a calculation
-		
+
 		Notes: Make sure you check if the cache data is valid and if not recache it. Otherwise when when screen size changes the data will suddenly be nil
 	]]
 	local function vgui_cache(id,cback)
 		local data = cback() || false
-		
+
 		if data then
 			store[id] = data
 			if data == 0 then
@@ -29,7 +31,7 @@ if CLIENT then
 			print('[vgui | '..id..'] Callback function did not propperly finish, calculation has not been cached!!!')
 		end
 	end
-	_G.MathCache.vgui_cache = vgui_cache
+	MathCache.vgui_cache = vgui_cache
 
 	hook.Add('OnScreenSizeChanged','vgui_cache_reset',function()
 		ui_cache = {}
@@ -42,7 +44,7 @@ end
 	Parameters:
 		id - The ID of the calculation you want to cache(can be a number or string, however it is best to use a string unless you know exactly what each entry will be.)
 		cback - The function callback used to perform a calculation
-		
+
 	Notes: you can cache numbers, but you can also cache Vectors, Angles, Colors, Strings and Bools. Just make sure not to cache dynamic data
 ]]
 local function Cache(id,cback)
@@ -56,6 +58,22 @@ local function Cache(id,cback)
 	else
 		print('['..id..'] Callback function did not propperly finish, calculation has not been cached!!!')
 	end
+end
+
+--[[
+	Quick Calculation function:
+	Description: Quickly check and retireve the data or calculate it
+	Parameters:
+		id - The ID of the data you want to retrieve
+		cback - A function to calculate the data IF it doesn't exist in the storage
+]]
+local function Quick(id,cback)
+	if store[id] then
+		return store[id]	
+	end
+
+	store[id] = cback()
+	return store[id]
 end
 
 --[[
@@ -88,7 +106,10 @@ local function Dump()
 	store = {}
 end
 
-_G.MathCache.Cache = Cache
-_G.MathCache.Get = Get
-_G.MathCache.Reset = Reset
-_G.MathCache.Dump = Dump
+MathCache.Cache = Cache
+MathCache.Get = Get
+MathCache.Quick = Quick
+MathCache.Reset = Reset
+MathCache.Dump = Dump
+
+
