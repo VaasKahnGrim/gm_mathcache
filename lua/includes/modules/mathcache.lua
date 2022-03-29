@@ -1,10 +1,14 @@
-AddCSLuaFile()
-MathCache = MathCache or {} -- Create our global table for the library
+local gmod = (branch and true) or false	-- Used to allow for the library to function outside of garry's mod properly
+
+if gmod then
+	AddCSLuaFile()
+	MathCache = MathCache or {} -- Create our global table for the library
+end
 
 local store = {} -- Where we store cached math calculations 
 
 -- For vgui caching, only exists clientside
-if CLIENT then
+if gmod and CLIENT then		-- This does not exist outside of garry's mod
 	local ui_cache = {}
 
 	--[[
@@ -106,10 +110,19 @@ local function Dump()
 	store = {}
 end
 
-MathCache.Cache = Cache
-MathCache.Get = Get
-MathCache.Quick = Quick
-MathCache.Reset = Reset
-MathCache.Dump = Dump
-
+if gmod then
+	MathCache.Cache = Cache
+	MathCache.Get = Get
+	MathCache.Quick = Quick
+	MathCache.Reset = Reset
+	MathCache.Dump = Dump
+else	-- For compatibility outside of garry's mod
+	return {
+		Cache = Cache,
+		Get = Get,
+		Quick = Quick,
+		Reset = Reset,
+		Dump = Dump
+	}
+end
 
